@@ -1,0 +1,196 @@
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+    <meta charset="UTF-8">
+    <title>Sistem Pakar Kerusakan Komputer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 p-6">
+
+    <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow">
+
+    <h1 class="text-2xl font-bold text-center mb-6">
+        Sistem Pakar Deteksi Kerusakan Komputer
+    </h1>
+
+    <div id="gejalaList" class="space-y-3"></div>
+
+    <div class="text-center mt-6">
+        <button onclick="diagnosa()" 
+        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+        Simpulkan
+        </button>
+    </div>
+
+    <div id="hasil" class="mt-6 hidden p-4 bg-gray-100 rounded"></div>
+
+    </div>
+
+    <script>
+    //ini untuk gejala
+    const gejala = {
+    B1:"Tidak ada gambar di monitor",
+    B2:"Garis horizontal/vertikal di monitor",
+    B3:"Tidak ada tampilan BIOS",
+    B4:"Error pada BIOS",
+    B5:"Alarm BIOS berbunyi",
+    B6:"Suara aneh pada HDD",
+    B7:"Sering hang/crash",
+    B8:"Selalu scandisk saat boot",
+    B9:"Error saat menjalankan game",
+    B10:"Driver tidak terdeteksi",
+    B11:"Restart otomatis",
+    B12:"Blue screen",
+    B13:"Tidak ada suara",
+    B14:"Error aplikasi audio",
+    B15:"Error saat OS load",
+    B16:"Komputer mati total",
+    B17:"Mati tiba-tiba",
+    B18:"Kekurangan memory",
+    B19:"Lambat",
+    B20:"Grafis berat",
+    B21:"Device tidak terdeteksi di BIOS",
+    B22:"Deteksi BIOS salah",
+    B23:"Sebagian perangkat mati",
+    B24:"Keyboard tidak berfungsi",
+    B25:"Mouse tidak berfungsi"
+    };
+
+    //ini untuk kerusakan
+    const kerusakan = {
+    A1:"Monitor Rusak",
+    A2:"Memori Rusak",
+    A3:"HDD Rusak",
+    A4:"VGA Rusak",
+    A5:"Sound Card Rusak",
+    A6:"OS Bermasalah",
+    A7:"Aplikasi Rusak",
+    A8:"PSU Rusak",
+    A9:"Processor Rusak",
+    A10:"Memory Kurang",
+    A11:"VGA Kurang",
+    A12:"Processor Lemah",
+    A13:"Kabel IDE Rusak",
+    A14:"Daya PSU Kurang",
+    A15:"USB Rusak",
+    A16:"Keyboard Rusak",
+    A17:"Mouse Rusak"
+    };
+
+    //ini untuk rules dan untuk certainty factor atau tingkat kepastian
+    const rules = [
+    { if:["B1","B2"], then:"A1", cf:0.9 },
+    { if:["B3","B4","B5","B11","B12"], then:"A2", cf:0.8 },
+    { if:["B6","B7","B8","B10","B21","B22"], then:"A3", cf:0.85 },
+    { if:["B1","B3","B5","B9","B10","B12","B13"], then:"A4", cf:0.85 },
+    { if:["B10","B13","B14"], then:"A5", cf:0.9 },
+    { if:["B11","B15"], then:"A6", cf:0.8 },
+    { if:["B7","B12"], then:"A7", cf:0.75 },
+    { if:["B16","B17"], then:"A8", cf:0.95 },
+    { if:["B1","B3","B4","B5"], then:"A9", cf:0.8 },
+    { if:["B18","B19"], then:"A10", cf:0.9 },
+    { if:["B9","B20"], then:"A11", cf:0.85 },
+    { if:["B19"], then:"A12", cf:0.7 },
+    { if:["B21"], then:"A13", cf:0.8 },
+    { if:["B5","B23"], then:"A14", cf:0.85 },
+    { if:["B10"], then:"A15", cf:0.7 },
+    { if:["B10","B24"], then:"A16", cf:0.9 },
+    { if:["B10","B25"], then:"A17", cf:0.9 }
+    ];
+
+    let jawaban = {};
+
+    const container = document.getElementById("gejalaList");
+
+    for (let kode in gejala) {
+    jawaban[kode] = null;
+
+    container.innerHTML += `
+    <div class="flex justify-between items-center border p-3 rounded">
+        
+        <span>${kode} - ${gejala[kode]}</span>
+        
+        <div class="flex gap-2">
+        <button onclick="setJawaban('${kode}','ya',this)" 
+            class="btn bg-gray-300 px-3 py-1 rounded">YA</button>
+            
+        <button onclick="setJawaban('${kode}','tidak',this)" 
+            class="btn bg-gray-300 px-3 py-1 rounded">TIDAK</button>
+        </div>
+        
+    </div>`;
+    }
+
+    function setJawaban(kode, nilai, btn) {
+        const parent = btn.parentElement;
+        const buttons = parent.querySelectorAll("button");
+
+    if (jawaban[kode] === nilai) {
+        jawaban[kode] = null;
+        buttons.forEach(b => { b.classList.remove("bg-green-500","bg-red-500","text-white")
+        b.classList.add("bg-gray-300");
+        });
+        return;
+    }
+    
+    jawaban[kode] = nilai;
+
+    buttons.forEach(b=> {
+        b.classList.remove("bg-green-500","bg-red-500","text-white");
+        b.classList.add("bg-gray-300");
+
+        if(nilai === "ya") {
+        buttons[0].classList.remove("bg-gray-300");
+        buttons[0].classList.add("bg-green-500","text-white");
+        } else {
+        buttons[1].classList.remove("bg-gray-300");
+        buttons[1].classList.add("bg-red-500","text-white");
+        }
+    });
+    console.log(jawaban);
+    }
+
+    function diagnosa() {
+    let hasilCF = {};
+
+    rules.forEach(rule => {
+        let nilai = rule.if.map(g => jawaban[g]);
+
+        if (nilai.every(v => v === "ya")) {
+        let cfRule = 1 * rule.cf;
+
+        if (hasilCF[rule.then]) {
+            hasilCF[rule.then] += cfRule * (1 - hasilCF[rule.then]);
+        } else {
+            hasilCF[rule.then] = cfRule;
+        }
+        }
+    });
+
+    tampilHasil(hasilCF);
+    }
+
+    //ini untuk menampilkan hasil
+    function tampilHasil(data) {
+    const hasilDiv = document.getElementById("hasil");
+
+    if (Object.keys(data).length === 0) {
+        hasilDiv.innerHTML = "❌ Tidak ditemukan kerusakan.";
+    } else {
+        let sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]);
+
+        let html = "<h2 class='font-bold mb-2'>Hasil Diagnosa:</h2>";
+
+        sorted.forEach(([kode,val])=>{
+        html += `<p>✔ ${kerusakan[kode]} (${(val*100).toFixed(2)}%)</p>`;
+        });
+
+        hasilDiv.innerHTML = html;
+    }
+
+    hasilDiv.classList.remove("hidden");
+    }
+    </script>
+
+    </body>
+    </html>
