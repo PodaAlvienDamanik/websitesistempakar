@@ -1,197 +1,446 @@
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
+<!DOCTYPE html>
+<html lang="id">
+<head>
     <meta charset="UTF-8">
-    <title>Sistem Pakar Kerusakan Komputer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pakar Diagnosis Komputer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="bg-gray-100 p-6">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow">
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1e40af;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text: #f1f5f9;
+            --text-muted: #cbd5e1;
+        }
 
-    <h1 class="text-2xl font-bold text-center mb-6">
-        Sistem Pakar Deteksi Kerusakan Komputer
-    </h1>
+        body {
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1f3a 100%);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    <div id="gejalaList" class="space-y-3"></div>
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
 
-    <div class="text-center mt-6">
-        <button onclick="diagnosa()" 
-        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
-        Simpulkan
-        </button>
-    </div>
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    <div id="hasil" class="mt-6 hidden p-4 bg-gray-100 rounded"></div>
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
 
-    </div>
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-tertiary);
+            color: var(--text);
+            border-color: var(--bg-tertiary);
+        }
+
+        .btn-small:hover {
+            background: transparent;
+        }
+
+        .btn-small.active-yes {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .btn-small.active-no {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        .gejala-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.25rem;
+            border-radius: 0.875rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .gejala-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .result-card {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-empty {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            animation: progress 0.6s ease;
+        }
+
+        @keyframes progress {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        .header-blur {
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .icon-box {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-blur sticky top-0 z-50">
+        <div class="container-custom py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="icon-box">⚙️</div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">DiagnosePC</h1>
+                    <p class="text-xs text-text-muted">Sistem Pakar Cerdas</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container-custom py-12">
+        <!-- Intro Section -->
+        <section class="mb-12">
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold mb-4">Diagnosis Cepat Kerusakan Komputer</h2>
+                <p class="text-text-muted max-w-2xl mx-auto text-lg">
+                    Gunakan sistem pakar kami untuk mendeteksi masalah komputer Anda dengan akurat. 
+                    Pilih gejala yang Anda rasakan dan dapatkan rekomendasi perbaikan.
+                </p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="bg-bg-secondary rounded-lg p-4 mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-sm font-medium">Progres Pemeriksaan</p>
+                    <span class="text-sm text-text-muted"><span id="progressCount">0</span>/25 gejala</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gejala Section -->
+        <section class="mb-12">
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-2 pl-2">
+                Pilih Gejala yang Anda Alami
+            </h3>
+            <div id="gejalaList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- Action Section -->
+        <section class="text-center mb-12">
+            <button onclick="diagnosa()" class="btn-primary mb-4">
+                🔍 Jalankan Diagnosis
+            </button>
+            <button onclick="resetForm()" class="ml-4 px-6 py-3 bg-bg-tertiary hover:bg-bg-secondary text-text rounded-lg font-semibold transition">
+                ↻ Reset
+            </button>
+        </section>
+
+        <!-- Result Section -->
+        <section id="resultSection" class="hidden mb-12">
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <span class="icon-box" style="width: 2.5rem; height: 2.5rem; font-size: 1.25rem;">✓</span>
+                Hasil Diagnosis
+            </h3>
+            <div id="hasil" class="bg-bg-secondary rounded-lg p-8 border border-primary border-opacity-30"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-opacity-10 border-white py-8 mt-16">
+        <div class="container-custom text-center">
+            <p class="text-text-muted text-sm">
+                &copy; 2026 Sistem Pakar Diagnosis Komputer. Developed with 💜 by Poda Alvien Damanik.
+            </p>
+        </div>
+    </footer>
 
     <script>
-    //ini untuk gejala
-    const gejala = {
-    B1:"Tidak ada gambar di monitor",
-    B2:"Garis horizontal/vertikal di monitor",
-    B3:"Tidak ada tampilan BIOS",
-    B4:"Error pada BIOS",
-    B5:"Alarm BIOS berbunyi",
-    B6:"Suara aneh pada HDD",
-    B7:"Sering hang/crash",
-    B8:"Selalu scandisk saat boot",
-    B9:"Error saat menjalankan game",
-    B10:"Driver tidak terdeteksi",
-    B11:"Restart otomatis",
-    B12:"Blue screen",
-    B13:"Tidak ada suara",
-    B14:"Error aplikasi audio",
-    B15:"Error saat OS load",
-    B16:"Komputer mati total",
-    B17:"Mati tiba-tiba",
-    B18:"Kekurangan memory",
-    B19:"Lambat",
-    B20:"Grafis berat",
-    B21:"Device tidak terdeteksi di BIOS",
-    B22:"Deteksi BIOS salah",
-    B23:"Sebagian perangkat mati",
-    B24:"Keyboard tidak berfungsi",
-    B25:"Mouse tidak berfungsi"
-    };
+        // Data Gejala
+        const gejala = {
+            B1: "Tidak ada gambar di monitor",
+            B2: "Garis horizontal/vertikal di monitor",
+            B3: "Tidak ada tampilan BIOS",
+            B4: "Error pada BIOS",
+            B5: "Alarm BIOS berbunyi",
+            B6: "Suara aneh pada HDD",
+            B7: "Sering hang/crash",
+            B8: "Selalu scandisk saat boot",
+            B9: "Error saat menjalankan game",
+            B10: "Driver tidak terdeteksi",
+            B11: "Restart otomatis",
+            B12: "Blue screen",
+            B13: "Tidak ada suara",
+            B14: "Error aplikasi audio",
+            B15: "Error saat OS load",
+            B16: "Komputer mati total",
+            B17: "Mati tiba-tiba",
+            B18: "Kekurangan memory",
+            B19: "Lambat",
+            B20: "Grafis berat",
+            B21: "Device tidak terdeteksi di BIOS",
+            B22: "Deteksi BIOS salah",
+            B23: "Sebagian perangkat mati",
+            B24: "Keyboard tidak berfungsi",
+            B25: "Mouse tidak berfungsi"
+        };
 
-    //ini untuk kerusakan
-    const kerusakan = {
-    A1:"Monitor Rusak",
-    A2:"Memori Rusak",
-    A3:"HDD Rusak",
-    A4:"VGA Rusak",
-    A5:"Sound Card Rusak",
-    A6:"OS Bermasalah",
-    A7:"Aplikasi Rusak",
-    A8:"PSU Rusak",
-    A9:"Processor Rusak",
-    A10:"Memory Kurang",
-    A11:"VGA Kurang",
-    A12:"Processor Lemah",
-    A13:"Kabel IDE Rusak",
-    A14:"Daya PSU Kurang",
-    A15:"USB Rusak",
-    A16:"Keyboard Rusak",
-    A17:"Mouse Rusak"
-    };
+        // Data Kerusakan
+        const kerusakan = {
+            A1: "Monitor Rusak",
+            A2: "Memori Rusak",
+            A3: "HDD Rusak",
+            A4: "VGA Rusak",
+            A5: "Sound Card Rusak",
+            A6: "OS Bermasalah",
+            A7: "Aplikasi Rusak",
+            A8: "PSU Rusak",
+            A9: "Processor Rusak",
+            A10: "Memory Kurang",
+            A11: "VGA Kurang",
+            A12: "Processor Lemah",
+            A13: "Kabel IDE Rusak",
+            A14: "Daya PSU Kurang",
+            A15: "USB Rusak",
+            A16: "Keyboard Rusak",
+            A17: "Mouse Rusak"
+        };
 
-    //ini untuk rules dan untuk certainty factor atau tingkat kepastian
-    const rules = [
-    { if:["B1","B2"], then:"A1", cf:0.9 },
-    { if:["B3","B4","B5","B11","B12"], then:"A2", cf:0.8 },
-    { if:["B6","B7","B8","B10","B21","B22"], then:"A3", cf:0.85 },
-    { if:["B1","B3","B5","B9","B10","B12","B13"], then:"A4", cf:0.85 },
-    { if:["B10","B13","B14"], then:"A5", cf:0.9 },
-    { if:["B11","B15"], then:"A6", cf:0.8 },
-    { if:["B7","B12"], then:"A7", cf:0.75 },
-    { if:["B16","B17"], then:"A8", cf:0.95 },
-    { if:["B1","B3","B4","B5"], then:"A9", cf:0.8 },
-    { if:["B18","B19"], then:"A10", cf:0.9 },
-    { if:["B9","B20"], then:"A11", cf:0.85 },
-    { if:["B19"], then:"A12", cf:0.7 },
-    { if:["B21"], then:"A13", cf:0.8 },
-    { if:["B5","B23"], then:"A14", cf:0.85 },
-    { if:["B10"], then:"A15", cf:0.7 },
-    { if:["B10","B24"], then:"A16", cf:0.9 },
-    { if:["B10","B25"], then:"A17", cf:0.9 }
-    ];
+        // Rules
+        const rules = [
+            { if: ["B1", "B2"], then: "A1" },
+            { if: ["B3", "B4", "B5", "B11", "B12"], then: "A2" },
+            { if: ["B6", "B7", "B8", "B10", "B21", "B22"], then: "A3" },
+            { if: ["B1", "B3", "B5", "B9", "B10", "B12", "B13"], then: "A4" },
+            { if: ["B10", "B13", "B14"], then: "A5" },
+            { if: ["B11", "B15"], then: "A6" },
+            { if: ["B7", "B12"], then: "A7" },
+            { if: ["B16", "B17"], then: "A8" },
+            { if: ["B1", "B3", "B4", "B5"], then: "A9" },
+            { if: ["B18", "B19"], then: "A10" },
+            { if: ["B9", "B20"], then: "A11" },
+            { if: ["B19"], then: "A12" },
+            { if: ["B21"], then: "A13" },
+            { if: ["B5", "B23"], then: "A14" },
+            { if: ["B10"], then: "A15" },
+            { if: ["B10", "B24"], then: "A16" },
+            { if: ["B10", "B25"], then: "A17" }
+        ];
 
-    let jawaban = {};
+        let jawaban = {};
 
-    const container = document.getElementById("gejalaList");
+        // Initialize gejala list
+        const container = document.getElementById("gejalaList");
+        for (let kode in gejala) {
+            jawaban[kode] = null;
 
-    for (let kode in gejala) {
-    jawaban[kode] = null;
+            container.innerHTML += `
+                <div class="gejala-card">
+                    <p class="font-semibold mb-3">${kode} - ${gejala[kode]}</p>
+                    <div class="flex gap-2">
+                        <button onclick="setJawaban('${kode}','ya',this)" class="btn-small flex-1">✓ Ya</button>
+                        <button onclick="setJawaban('${kode}','tidak',this)" class="btn-small flex-1">✗ Tidak</button>
+                    </div>
+                </div>`;
+        }
 
-    container.innerHTML += `
-    <div class="flex justify-between items-center border p-3 rounded">
-        
-        <span>${kode} - ${gejala[kode]}</span>
-        
-        <div class="flex gap-2">
-        <button onclick="setJawaban('${kode}','ya',this)" 
-            class="btn bg-gray-300 px-3 py-1 rounded">YA</button>
+        // Set jawaban dan update progress
+        function setJawaban(kode, nilai, btn) {
+            const parent = btn.parentElement;
+            const buttons = parent.querySelectorAll("button");
+
+            if (jawaban[kode] === nilai) {
+                jawaban[kode] = null;
+                buttons.forEach(b => {
+                    b.classList.remove("active-yes", "active-no");
+                });
+            } else {
+                jawaban[kode] = nilai;
+                buttons.forEach(b => b.classList.remove("active-yes", "active-no"));
+                
+                if (nilai === "ya") {
+                    buttons[0].classList.add("active-yes");
+                } else {
+                    buttons[1].classList.add("active-no");
+                }
+            }
+            updateProgress();
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const answered = Object.values(jawaban).filter(v => v !== null).length;
+            const total = Object.keys(jawaban).length;
+            const percentage = (answered / total) * 100;
             
-        <button onclick="setJawaban('${kode}','tidak',this)" 
-            class="btn bg-gray-300 px-3 py-1 rounded">TIDAK</button>
-        </div>
-        
-    </div>`;
-    }
-
-    //ini untuk mengatur jawaban dan untuk memberikan warna pada tombol
-    function setJawaban(kode, nilai, btn) {
-        const parent = btn.parentElement;
-        const buttons = parent.querySelectorAll("button");
-
-    if (jawaban[kode] === nilai) {
-        jawaban[kode] = null;
-        buttons.forEach(b => { b.classList.remove("bg-green-500","bg-red-500","text-white")
-        b.classList.add("bg-gray-300");
-        });
-        return;
-    }
-    
-    jawaban[kode] = nilai;
-
-    buttons.forEach(b=> {
-        b.classList.remove("bg-green-500","bg-red-500","text-white");
-        b.classList.add("bg-gray-300");
-
-        if(nilai === "ya") {
-        buttons[0].classList.remove("bg-gray-300");
-        buttons[0].classList.add("bg-green-500","text-white");
-        } else {
-        buttons[1].classList.remove("bg-gray-300");
-        buttons[1].classList.add("bg-red-500","text-white");
+            document.getElementById("progressBar").style.width = percentage + "%";
+            document.getElementById("progressCount").textContent = answered;
         }
-    });
-    console.log(jawaban);
-    }
 
-    function diagnosa() {
-    let hasilCF = {};
+        // Diagnosa
+        function diagnosa() {
+            let hasilCF = {};
 
-    rules.forEach(rule => {
-        let nilai = rule.if.map(g => jawaban[g]);
+            rules.forEach(rule => {
+                let nilai = rule.if.map(g => jawaban[g]);
 
-        if (nilai.every(v => v === "ya")) {
-        let cfRule = 1 * rule.cf;
+                if (nilai.every(v => v === "ya")) {
+                    if (hasilCF[rule.then]) {
+                        hasilCF[rule.then] += 1;
+                    } else {
+                        hasilCF[rule.then] = 1;
+                    }
+                }
+            });
 
-        if (hasilCF[rule.then]) {
-            hasilCF[rule.then] += cfRule * (1 - hasilCF[rule.then]);
-        } else {
-            hasilCF[rule.then] = cfRule;
+            tampilHasil(hasilCF);
         }
+
+        // Tampil hasil
+        function tampilHasil(data) {
+            const hasilDiv = document.getElementById("hasil");
+            const resultSection = document.getElementById("resultSection");
+
+            if (Object.keys(data).length === 0) {
+                hasilDiv.innerHTML = `
+                    <div class="result-card result-empty">
+                        <p class="text-lg font-semibold mb-2">❌ Tidak Ada Diagnosis</p>
+                        <p class="text-text-muted">Tidak ditemukan kerusakan berdasarkan gejala yang dipilih. Silakan periksa kembali gejala yang Anda pilih.</p>
+                    </div>`;
+            } else {
+                let sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+                let html = `
+                    <div class="mb-6">
+                        <p class="text-text-muted mb-4">Berdasarkan gejala yang Anda pilih, kami menemukan kemungkinan kerusakan berikut:</p>`;
+
+                sorted.forEach(([kode], index) => {
+                    html += `
+                        <div class="result-card">
+                            <p class="text-lg font-semibold mb-2">✅ ${kerusakan[kode]}</p>
+                            <p class="text-text-muted">Kemungkinan kerusakan nomor ${index + 1} berdasarkan gejala yang dipilih.</p>
+                        </div>`;
+                });
+
+                html += `
+                    </div>
+                    <div class="bg-bg-tertiary rounded-lg p-4 mt-6">
+                        <p class="text-sm text-text-muted">
+                        <strong>Tips:</strong> Silakan konsultasikan hasil ini kepada teknisi profesional untuk verifikasi dan perbaikan lebih lanjut.
+                        </p>
+                    </div>`;
+
+                hasilDiv.innerHTML = html;
+            }
+
+            resultSection.classList.remove("hidden");
+            hasilDiv.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-    });
 
-    tampilHasil(hasilCF);
-    }
-
-    //ini untuk menampilkan hasil
-    function tampilHasil(data) {
-    const hasilDiv = document.getElementById("hasil");
-
-    if (Object.keys(data).length === 0) {
-        hasilDiv.innerHTML = "❌ Tidak ditemukan kerusakan.";
-    } else {
-        let sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]);
-
-        let html = "<h2 class='font-bold mb-2'>Hasil Diagnosa:</h2>";
-
-        sorted.forEach(([kode,val])=>{
-        html += `<p>✔ ${kerusakan[kode]} (${(val*100).toFixed(2)}%)</p>`;
-        });
-
-        hasilDiv.innerHTML = html;
-    }
-
-    hasilDiv.classList.remove("hidden");
-    }
+        // Reset form
+        function resetForm() {
+            for (let kode in jawaban) {
+                jawaban[kode] = null;
+            }
+            document.querySelectorAll(".btn-small").forEach(btn => {
+                btn.classList.remove("active-yes", "active-no");
+            });
+            document.getElementById("resultSection").classList.add("hidden");
+            updateProgress();
+        }
     </script>
-
-    </body>
-    </html>
+</body>
+</html>
