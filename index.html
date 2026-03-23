@@ -174,7 +174,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header-blur sticky top-0 z-50">
         <div class="container-custom py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -187,9 +186,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container-custom py-12">
-        <!-- Intro Section -->
         <section class="mb-12">
             <div class="text-center mb-8">
                 <h2 class="text-4xl font-bold mb-4">Diagnosis Cepat Kerusakan Komputer</h2>
@@ -199,7 +196,6 @@
                 </p>
             </div>
 
-            <!-- Progress Indicator -->
             <div class="bg-bg-secondary rounded-lg p-4 mb-8">
                 <div class="flex justify-between items-center mb-2">
                     <p class="text-sm font-medium">Progres Pemeriksaan</p>
@@ -211,7 +207,6 @@
             </div>
         </section>
 
-        <!-- Gejala Section -->
         <section class="mb-12">
             <h3 class="text-2xl font-bold mb-6 flex items-center gap-2 pl-2">
                 Pilih Gejala yang Anda Alami
@@ -219,7 +214,6 @@
             <div id="gejalaList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- Action Section -->
         <section class="text-center mb-12">
             <button onclick="diagnosa()" class="btn-primary mb-4">
                 🔍 Jalankan Diagnosis
@@ -229,7 +223,6 @@
             </button>
         </section>
 
-        <!-- Result Section -->
         <section id="resultSection" class="hidden mb-12">
             <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
                 <span class="icon-box" style="width: 2.5rem; height: 2.5rem; font-size: 1.25rem;">✓</span>
@@ -239,7 +232,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="border-t border-opacity-10 border-white py-8 mt-16">
         <div class="container-custom text-center">
             <p class="text-text-muted text-sm">
@@ -249,7 +241,6 @@
     </footer>
 
     <script>
-        // Data Gejala
         const gejala = {
             B1: "Tidak ada gambar di monitor",
             B2: "Garis horizontal/vertikal di monitor",
@@ -278,7 +269,6 @@
             B25: "Mouse tidak berfungsi"
         };
 
-        // Data Kerusakan
         const kerusakan = {
             A1: "Monitor Rusak",
             A2: "Memori Rusak",
@@ -299,7 +289,6 @@
             A17: "Mouse Rusak"
         };
 
-        // Rules
         const rules = [
             { if: ["B1", "B2"], then: "A1" },
             { if: ["B3", "B4", "B5", "B11", "B12"], then: "A2" },
@@ -322,7 +311,6 @@
 
         let jawaban = {};
 
-        // Initialize gejala list
         const container = document.getElementById("gejalaList");
         for (let kode in gejala) {
             jawaban[kode] = null;
@@ -337,7 +325,6 @@
                 </div>`;
         }
 
-        // Set jawaban dan update progress
         function setJawaban(kode, nilai, btn) {
             const parent = btn.parentElement;
             const buttons = parent.querySelectorAll("button");
@@ -360,7 +347,6 @@
             updateProgress();
         }
 
-        // Update progress bar
         function updateProgress() {
             const answered = Object.values(jawaban).filter(v => v !== null).length;
             const total = Object.keys(jawaban).length;
@@ -370,7 +356,6 @@
             document.getElementById("progressCount").textContent = answered;
         }
 
-        // Diagnosa
         function diagnosa() {
             let hasilCF = {};
 
@@ -389,7 +374,6 @@
             tampilHasil(hasilCF);
         }
 
-        // Tampil hasil
         function tampilHasil(data) {
             const hasilDiv = document.getElementById("hasil");
             const resultSection = document.getElementById("resultSection");
@@ -430,7 +414,6 @@
             hasilDiv.scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
-        // Reset form
         function resetForm() {
             for (let kode in jawaban) {
                 jawaban[kode] = null;
